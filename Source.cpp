@@ -6,8 +6,10 @@
 
 using namespace std;
 
-bool DownloadCatImage(const string& url, const string& filename) {
-    struct WinHttpHandle {
+bool DownloadCatImage(const string& url, const string& filename) 
+{
+    struct WinHttpHandle
+    {
         HINTERNET handle;
         WinHttpHandle(HINTERNET h) : handle(h) {}
         ~WinHttpHandle() { if (handle) WinHttpCloseHandle(handle); }
@@ -19,13 +21,15 @@ bool DownloadCatImage(const string& url, const string& filename) {
         WINHTTP_NO_PROXY_NAME,
         WINHTTP_NO_PROXY_BYPASS,
         0);
-    if (!hSession) {
+    if (!hSession) 
+    {
         return false;
     }
 
     WinHttpHandle hConnect = WinHttpConnect(hSession, L"cataas.com",
         INTERNET_DEFAULT_HTTPS_PORT, 0);
-    if (!hConnect) {
+    if (!hConnect) 
+    {
         return false;
     }
 
@@ -33,26 +37,31 @@ bool DownloadCatImage(const string& url, const string& filename) {
         NULL, WINHTTP_NO_REFERER,
         WINHTTP_DEFAULT_ACCEPT_TYPES,
         WINHTTP_FLAG_SECURE);
-    if (!hRequest) {
+    if (!hRequest)
+    {
         return false;
     }
 
     if (!WinHttpSendRequest(hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0,
-        WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
+        WINHTTP_NO_REQUEST_DATA, 0, 0, 0))
+    {
         return false;
     }
 
-    if (!WinHttpReceiveResponse(hRequest, NULL)) {
+    if (!WinHttpReceiveResponse(hRequest, NULL)) 
+    {
         return false;
     }
 
     FILE* file = nullptr;
     errno_t err = fopen_s(&file, filename.c_str(), "wb");
-    if (err != 0 || file == nullptr) {
+    if (err != 0 || file == nullptr)
+    {
         return false;
     }
 
-    struct FileCloser {
+    struct FileCloser
+    {
         FILE* f;
         FileCloser(FILE* file) : f(file) {}
         ~FileCloser() { if (f) fclose(f); }
@@ -60,7 +69,8 @@ bool DownloadCatImage(const string& url, const string& filename) {
 
     DWORD bytesRead;
     BYTE buffer[4096];
-    while (WinHttpReadData(hRequest, buffer, sizeof(buffer), &bytesRead)) {
+    while (WinHttpReadData(hRequest, buffer, sizeof(buffer), &bytesRead))
+    {
         if (bytesRead == 0) break;
         fwrite(buffer, 1, bytesRead, file);
     }
@@ -68,7 +78,8 @@ bool DownloadCatImage(const string& url, const string& filename) {
     return true;
 }
 
-int main() {
+int main()
+{
     system("chcp 1251 > nul");
 
     string url = "https://cataas.com/cat";
@@ -77,21 +88,25 @@ int main() {
     cout << "Press Enter to download a cat image (or type 'q' to exit):" << endl;
     cout << "Images will be saved in the current folder as cat1.jpg, cat2.jpg, etc." << endl;
 
-    while (true) {
+    while (true) 
+    {
         string input;
         getline(cin, input);
 
-        if (input == "q") {
+        if (input == "q") 
+        {
             break;
         }
 
         string filename = "cat" + to_string(catNumber) + ".jpg";
 
-        if (DownloadCatImage(url, filename)) {
+        if (DownloadCatImage(url, filename))
+        {
             cout << "Cat #" << catNumber << " successfully saved as " << filename << endl;
             catNumber++;
         }
-        else {
+        else 
+        {
             cout << "Error downloading cat image" << endl;
         }
 
